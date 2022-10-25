@@ -21,6 +21,7 @@ const NumItem = (props)=>{
       quantity:inputVal,
       note:' '
     }])
+    // API to be added: update data to firebase
   }
 
   var handleSubClick = ()=>{
@@ -34,6 +35,7 @@ const NumItem = (props)=>{
       quantity:inputVal,
       note:' '
     }])
+    // API to be added: update data to firebase
   }
 
 
