@@ -90,6 +90,9 @@ const Rat = ()=>{
     onOpen: onOpenTagModal, 
     onClose: onCloseTagModal 
 } = useDisclosure()
+  const [idToAdd,setIdToAdd] = useState()
+  const [tagToAdd,setTagToAdd] = useState('')
+
 
 
 
@@ -196,14 +199,23 @@ const Rat = ()=>{
     })
     setRats(newRats)
   }
-  const handleAddTag = (id)=>{
+  const handleAddTag = ()=>{
+    console.log(idToAdd)
     const newRats = rats.map((rat)=>{
-      if(rat.id===id){
-        return {...rat,notes:[...rat.notes,'aaasdadaa']}
+      if(rat.id===idToAdd){
+        return {...rat,notes:[...rat.notes,tagToAdd]}
       }
       return rat
     })
     setRats(newRats)
+    onCloseTagModal();
+  }
+  const handleOpenTagModal = (id)=>{
+    setIdToAdd(id)
+    onOpenTagModal();
+  }
+  const handleTagToAddChange = (e)=>{
+    setTagToAdd(e.target.value)
   }
 
 
@@ -238,24 +250,7 @@ const Rat = ()=>{
               <Td>{rat.gender==='0'?<BsGenderFemale />:(rat.gender==='1'?<BsGenderMale/>:<FaBaby/>)}
               </Td>
               <Td>
-              <Button onClick={onOpenTagModal}>{rat.id}</Button>
-              <Modal isOpen={isOpenTagModal} onClose={onCloseTagModal}>
-                <ModalOverlay />
-                <ModalContent>
-                  <ModalHeader>Input New Tag Content</ModalHeader>
-                  <ModalCloseButton />
-                  <ModalBody>
-                      <input type="text" placeholder="new tag" onChange={handleTagsChange}/>
-                  </ModalBody>
-
-                  <ModalFooter>
-                    <Button colorScheme='blue' mr={3} onClick={onCloseTagModal}>
-                      Cancel
-                    </Button>
-                    <Button variant='ghost' colorScheme='red' onClick={()=>{handleAddTag(rat.id)}}>Add</Button>
-                  </ModalFooter>
-                </ModalContent>
-              </Modal>
+              <Button onClick={()=>handleOpenTagModal(rat.id)}>{rat.id}</Button>
 
                 {rat.notes.map((note,index)=>{
                   return (
@@ -314,7 +309,23 @@ const Rat = ()=>{
           </ModalFooter>
         </ModalContent>
       </Modal>
+      <Modal isOpen={isOpenTagModal} onClose={onCloseTagModal}>
+                <ModalOverlay />
+                <ModalContent>
+                  <ModalHeader>Input New Tag Content</ModalHeader>
+                  <ModalCloseButton />
+                  <ModalBody>
+                      <input type="text" placeholder="new tag" onChange={handleTagToAddChange}/>
+                  </ModalBody>
 
+                  <ModalFooter>
+                    <Button colorScheme='blue' mr={3} onClick={onCloseTagModal}>
+                      Cancel
+                    </Button>
+                    <Button variant='ghost' colorScheme='red' onClick={handleAddTag}>Add</Button>
+                  </ModalFooter>
+                </ModalContent>
+              </Modal>
 
 
   </div>
