@@ -9,6 +9,7 @@ import { Select } from '@chakra-ui/react'
 import { Heading } from '@chakra-ui/react'
 import { nanoid } from "nanoid";
 import { Text } from "@chakra-ui/react";
+import { addCollectionAndDocuments } from "../../../lib/firebase"; 
 
 
 import {
@@ -78,6 +79,11 @@ const Rat = ()=>{
       isDead:null
     }
   ]
+
+  const initFirestore = ()=>{
+    addCollectionAndDocuments('rats',init_rats)
+    console.log('add run')
+  }
 
   const [rats,setRats] = useState(init_rats)
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -222,6 +228,7 @@ const Rat = ()=>{
   return (
     <div>
       <h1>Rat Page</h1>
+      <Button onClick={initFirestore}>init firesotre data</Button>
       <Heading>Current Total: {curMale+curFemale+curBaby}</Heading>
       <Heading>Current Male: {curMale}</Heading>
       <Heading>Current Female: {curFemale}</Heading>
@@ -250,7 +257,7 @@ const Rat = ()=>{
               <Td>{rat.gender==='0'?<BsGenderFemale />:(rat.gender==='1'?<BsGenderMale/>:<FaBaby/>)}
               </Td>
               <Td>
-              <Button onClick={()=>handleOpenTagModal(rat.id)}>{rat.id}</Button>
+              <Button onClick={()=>handleOpenTagModal(rat.id)}>+</Button>
 
                 {rat.notes.map((note,index)=>{
                   return (
