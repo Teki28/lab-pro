@@ -99,13 +99,11 @@ export const getCurrentUser = () => {
   })
 }
 
-export const getCategoriesDocuments = async () => {
-  const collectionRef = collection(db, 'categories');
-  const q = query(collectionRef);
-
+export const getRatsDocuments = async () => {
+  const ratsRef = collection(db, 'rats');
+  const q = query(ratsRef);
   const querySnapshot = await getDocs(q);
   return querySnapshot.docs.map(docSnapshot => docSnapshot.data());
-
   //   // return categoryMap
 }
 

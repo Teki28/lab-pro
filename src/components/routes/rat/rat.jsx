@@ -10,6 +10,7 @@ import { Heading } from '@chakra-ui/react'
 import { nanoid } from "nanoid";
 import { Text } from "@chakra-ui/react";
 import { addCollectionAndDocuments } from "../../../lib/firebase"; 
+import { setDoc } from "firebase/firestore";
 
 
 import {
@@ -36,14 +37,29 @@ import {
   ModalCloseButton,
 } from '@chakra-ui/react'
 import React from 'react';
-
+import { collection, query } from "firebase/firestore";
+import { db } from "../../../lib/firebase";
+import { getRatsDocuments } from "../../../lib/firebase";
+import {useFirestoreQueryData,useFirestoreDocumentMutation} from "@react-query-firebase/firestore"
+import { doc } from "firebase/firestore";
 
 const Rat = ()=>{
+
+  const ratsRef = collection(db, 'rats');
+  const ratsQuery = useFirestoreQueryData(["rats"],query(ratsRef),{subscribe:true,idField:"name"})
+  const qrats = ratsQuery.data || []
+  console.log(qrats)
+
+  const newRatsRef = doc(ratsRef,'123')
+  const newRatsMutation = useFirestoreDocumentMutation(newRatsRef,{merge:true})
+  
+
+
   const curDate =  moment().format('YYYY-MM-DD')
   const color = ['green','red','blue']
   const init_rats = [
     {
-      id:1,
+      id:'1',
       name:'Taro',
       birthday:'2022-09-22',
       gender:'1',
@@ -52,7 +68,7 @@ const Rat = ()=>{
       isDead:null
     },
     {
-      id:2,
+      id:'2',
       name:'Jiro',
       birthday:'2022-09-10',
       gender:'2',
@@ -61,7 +77,7 @@ const Rat = ()=>{
       isDead:null
     },
     {
-      id:3,
+      id:'3',
       name:'Sanro',
       birthday:'2022-09-01',
       gender:'0',
@@ -70,7 +86,7 @@ const Rat = ()=>{
       isDead:null
     },
     {
-      id:4,
+      id:'4',
       name:'Yonro',
       birthday:'2022-08-22',
       gender:'0',
@@ -79,6 +95,8 @@ const Rat = ()=>{
       isDead:null
     }
   ]
+
+
 
   const initFirestore = ()=>{
     addCollectionAndDocuments('rats',init_rats)
@@ -148,9 +166,11 @@ const Rat = ()=>{
     const new_rats = [...rats]
     console.log('dead_rat ID: ',new_rats[index].id, 'dead date: ',curDate)
     new_rats[index].isDead = curDate
+    const setRat = new_rats[index]
     if(rats[index].gender==='1') setCurMale(curMale-1)
     else setCurFemale(curFemale-1)
     setRats(new_rats)
+    setDoc(doc(db, "rats", setRat.id), setRat,{merge:true});
   }
   const handleAdd = ()=>{
     console.log('Added')
@@ -163,6 +183,7 @@ const Rat = ()=>{
       notes:newTags,
       isDead:null
     }
+    setDoc(doc(db, "rats", newRat.id), newRat);
     setRats([...rats,newRat])
     if(newRat.gender==='1') setCurMale(curMale+1)
     else if(newRat.gender==='0') setCurFemale(curFemale+1)
@@ -229,6 +250,11 @@ const Rat = ()=>{
     <div>
       <h1>Rat Page</h1>
       <Button onClick={initFirestore}>init firesotre data</Button>
+      {/* {
+        qrats.map((rat)=>{
+          return (<div key={rat.id}>{rat.name}</div>)
+        })
+      } */}
       <Heading>Current Total: {curMale+curFemale+curBaby}</Heading>
       <Heading>Current Male: {curMale}</Heading>
       <Heading>Current Female: {curFemale}</Heading>
