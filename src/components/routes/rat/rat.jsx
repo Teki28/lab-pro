@@ -8,7 +8,6 @@ import { useDisclosure } from '@chakra-ui/react'
 import { Select } from '@chakra-ui/react'
 import { Heading } from '@chakra-ui/react'
 import { nanoid } from "nanoid";
-import { addCollectionAndDocuments } from "../../../lib/firebase"; 
 import { getDoc, setDoc,updateDoc } from "firebase/firestore";
 import {
   Table,
@@ -17,7 +16,8 @@ import {
   Tr,
   Th,
   Td,
-  Tfoot
+  Tfoot,
+  Text
 } from '@chakra-ui/react'
 import {
   Tag,
@@ -40,6 +40,8 @@ import {useFirestoreQueryData} from "@react-query-firebase/firestore"
 import { doc } from "firebase/firestore";
 
 const Rat = ()=>{
+
+
 
   const ratsRef = collection(db, 'rats');
   const ratsQuery = useFirestoreQueryData(["rats"],query(ratsRef),{subscribe:true,idField:"name"})
@@ -89,7 +91,8 @@ const Rat = ()=>{
   ]
 
   const initFirestore = ()=>{
-    addCollectionAndDocuments('rats',init_rats)
+    alert("I know you gonna click🤗 just wasted you 10 sec")
+    //addCollectionAndDocuments('rats',init_rats)
     console.log('add run')
   }
 
@@ -210,7 +213,7 @@ const Rat = ()=>{
     <div>
       <h1>Rat Page</h1>
       {/* For data initialization at development  */}
-      <Button onClick={initFirestore}>init firesotre data</Button>
+      <Button onClick={initFirestore}>Init Data(For test, do not click!)</Button>
       <Heading>Current Total: {qrats.filter(rat=>rat.isDead===null).length}</Heading>
       <Heading>Current Male: {qrats.filter(rat=>rat.gender==='1' && rat.isDead===null).length}</Heading>
       <Heading>Current Female: {qrats.filter(rat=>rat.gender==='0' && rat.isDead===null).length}</Heading>
@@ -220,7 +223,7 @@ const Rat = ()=>{
     <Thead>
       <Tr>
         <Th>Rats</Th>
-        <Th>Age</Th>
+        <Th>Age(days)</Th>
         <Th>Gender</Th>
         <Th>Tags</Th>
         <Th>Operation</Th>
@@ -278,23 +281,26 @@ const Rat = ()=>{
           <ModalCloseButton />
           <ModalBody>
             <form>
-              <input type="date" placeholder="birthday" onChange={handleDateChange}/>
-              <input type="text" placeholder="name:" onChange={handleNameChange}/>
+              <Text as="mark">Birthday:   </Text><input type="date" placeholder="birthday" onChange={handleDateChange}/>
+              <br></br>
+              <Text as="mark">Rat/Owner's Name:   </Text><input type="text" placeholder="name:" onChange={handleNameChange}/>
+              <br></br>
               <Select placeholder='Select gender' onChange={handleGenderChange}>
                 <option value='1'>Male</option>
                 <option value='0'>Female</option>
                 <option value='2'>Baby</option>
               </Select>
+              <Text as="mark">Notes:use comma to separate</Text>
+              <br></br>
               <input type="text" placeholder="tags" onChange={handleTagsChange}/>
             </form>
-            <h2>{newName}</h2>
           </ModalBody>
 
           <ModalFooter>
-            <Button colorScheme='blue' mr={3} onClick={onClose}>
+            <Button colorScheme='add' variant='ghost' mr={3} onClick={onClose}>
               Cancel
             </Button>
-            <Button variant='ghost' colorScheme='red' onClick={()=>{handleAdd()}}>Add</Button>
+            <Button  colorScheme='blue' onClick={()=>{handleAdd()}}>Add</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
