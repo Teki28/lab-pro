@@ -1,4 +1,4 @@
-import { useState,useEffect } from "react";
+import { useState} from "react";
 import moment from "moment/moment";
 import {BsGenderFemale,BsGenderMale} from 'react-icons/bs'
 import {FaBaby} from 'react-icons/fa'
@@ -8,11 +8,8 @@ import { useDisclosure } from '@chakra-ui/react'
 import { Select } from '@chakra-ui/react'
 import { Heading } from '@chakra-ui/react'
 import { nanoid } from "nanoid";
-import { Text } from "@chakra-ui/react";
 import { addCollectionAndDocuments } from "../../../lib/firebase"; 
-import { setDoc } from "firebase/firestore";
-
-
+import { getDoc, setDoc,updateDoc } from "firebase/firestore";
 import {
   Table,
   Thead,
@@ -39,8 +36,7 @@ import {
 import React from 'react';
 import { collection, query } from "firebase/firestore";
 import { db } from "../../../lib/firebase";
-import { getRatsDocuments } from "../../../lib/firebase";
-import {useFirestoreQueryData,useFirestoreDocumentMutation} from "@react-query-firebase/firestore"
+import {useFirestoreQueryData} from "@react-query-firebase/firestore"
 import { doc } from "firebase/firestore";
 
 const Rat = ()=>{
@@ -48,11 +44,7 @@ const Rat = ()=>{
   const ratsRef = collection(db, 'rats');
   const ratsQuery = useFirestoreQueryData(["rats"],query(ratsRef),{subscribe:true,idField:"name"})
   const qrats = ratsQuery.data || []
-  console.log(qrats)
 
-  const newRatsRef = doc(ratsRef,'123')
-  const newRatsMutation = useFirestoreDocumentMutation(newRatsRef,{merge:true})
-  
 
 
   const curDate =  moment().format('YYYY-MM-DD')
@@ -96,14 +88,12 @@ const Rat = ()=>{
     }
   ]
 
-
-
   const initFirestore = ()=>{
     addCollectionAndDocuments('rats',init_rats)
     console.log('add run')
   }
 
-  const [rats,setRats] = useState(init_rats)
+ 
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [newBirthday,setNewBirthday] = useState('')
   const [newName,setNewName] = useState('')
@@ -116,27 +106,6 @@ const Rat = ()=>{
 } = useDisclosure()
   const [idToAdd,setIdToAdd] = useState()
   const [tagToAdd,setTagToAdd] = useState('')
-
-
-
-
-  const [curMale,setCurMale] = useState(0)
-  const [curFemale,setCurFemale] = useState(0)
-  const [curBaby,setCurBaby] = useState(0)
-
-  useEffect(()=>{
-    const initMale = rats.filter(rat=>rat.gender==='1' && rat.isDead===null).length
-
-    const initFemale = rats.filter(rat=>rat.gender==='0' && rat.isDead===null).length
-
-    const initBaby = rats.filter(rat=>rat.gender==='2' && rat.isDead===null).length    
-
-    setCurFemale(initFemale)
-    setCurMale(initMale)
-    setCurBaby(initBaby)
-  },[])
-
-
 
 
   // Dragable data function, work on in the future
@@ -162,18 +131,14 @@ const Rat = ()=>{
   //       break;
   //   }
   // })
-  const handleDeathReport = (index)=>{
-    const new_rats = [...rats]
-    console.log('dead_rat ID: ',new_rats[index].id, 'dead date: ',curDate)
-    new_rats[index].isDead = curDate
-    const setRat = new_rats[index]
-    if(rats[index].gender==='1') setCurMale(curMale-1)
-    else setCurFemale(curFemale-1)
-    setRats(new_rats)
-    setDoc(doc(db, "rats", setRat.id), setRat,{merge:true});
+  
+  const handleDeathReport = (id)=>{
+    const docRef = doc(db, "rats", id);
+    updateDoc(docRef,{
+      isDead:curDate
+    })
   }
   const handleAdd = ()=>{
-    console.log('Added')
     const newRat = {
       id: nanoid(),
       name:newName,
@@ -184,10 +149,6 @@ const Rat = ()=>{
       isDead:null
     }
     setDoc(doc(db, "rats", newRat.id), newRat);
-    setRats([...rats,newRat])
-    if(newRat.gender==='1') setCurMale(curMale+1)
-    else if(newRat.gender==='0') setCurFemale(curFemale+1)
-    else setCurBaby(curBaby+1)
     formInit();
     onClose();
   }
@@ -217,24 +178,23 @@ const Rat = ()=>{
     console.log(newTag)
     setNewTags(newTag)
   }
-  const handleDeleteTag = (id,index)=>{
-    const newRats = rats.map((rat)=>{
-      if(rat.id === id){
-        return {...rat, notes: rat.notes.filter((_,i)=>i!==index)};
-      }
-      return rat
+  const handleDeleteTag = async (id,index)=>{
+    const docRef = doc(db, "rats", id);
+    const docSnap = await getDoc(docRef);
+    const curNotes = docSnap.data().notes
+    const afdeletedNotes = curNotes.filter((_,i)=>i!==index)
+    updateDoc(docRef,{
+      notes:afdeletedNotes
     })
-    setRats(newRats)
   }
-  const handleAddTag = ()=>{
+  const handleAddTag = async ()=>{
     console.log(idToAdd)
-    const newRats = rats.map((rat)=>{
-      if(rat.id===idToAdd){
-        return {...rat,notes:[...rat.notes,tagToAdd]}
-      }
-      return rat
+    const docRef = doc(db, "rats", idToAdd);
+    const docSnap = await getDoc(docRef);
+    const curNotes = docSnap.data().notes
+    updateDoc(docRef,{
+      notes:[...curNotes,tagToAdd]
     })
-    setRats(newRats)
     onCloseTagModal();
   }
   const handleOpenTagModal = (id)=>{
@@ -249,16 +209,12 @@ const Rat = ()=>{
   return (
     <div>
       <h1>Rat Page</h1>
+      {/* For data initialization at development  */}
       <Button onClick={initFirestore}>init firesotre data</Button>
-      {/* {
-        qrats.map((rat)=>{
-          return (<div key={rat.id}>{rat.name}</div>)
-        })
-      } */}
-      <Heading>Current Total: {curMale+curFemale+curBaby}</Heading>
-      <Heading>Current Male: {curMale}</Heading>
-      <Heading>Current Female: {curFemale}</Heading>
-      <Heading>Current Female: {curBaby}</Heading>
+      <Heading>Current Total: {qrats.filter(rat=>rat.isDead===null).length}</Heading>
+      <Heading>Current Male: {qrats.filter(rat=>rat.gender==='1' && rat.isDead===null).length}</Heading>
+      <Heading>Current Female: {qrats.filter(rat=>rat.gender==='0' && rat.isDead===null).length}</Heading>
+      <Heading>Current Baby: {qrats.filter(rat=>rat.gender==='2' && rat.isDead===null).length}</Heading>
       
   <Table variant='striped' colorScheme='teal'>
     <Thead>
@@ -272,7 +228,7 @@ const Rat = ()=>{
     </Thead>
     <Tbody>
       {
-        rats.map((rat,index)=>{
+        qrats.map((rat,index)=>{
           if(rat.isDead!==null){
             return null
           }
@@ -295,7 +251,7 @@ const Rat = ()=>{
                 })}
               </Td>
               <Td>
-              <Button colorScheme='red' size='xs' onClick={()=>{handleDeathReport(index)}}>
+              <Button colorScheme='red' size='xs' onClick={()=>{handleDeathReport(rat.id)}}>
                 Report Death
               </Button>
               </Td>
@@ -359,8 +315,6 @@ const Rat = ()=>{
                   </ModalFooter>
                 </ModalContent>
               </Modal>
-
-
   </div>
   )
 }
