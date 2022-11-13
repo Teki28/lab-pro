@@ -2,13 +2,14 @@ import { useState} from "react";
 import moment from "moment/moment";
 import {BsGenderFemale,BsGenderMale} from 'react-icons/bs'
 import {FaBaby} from 'react-icons/fa'
-import { Avatar} from '@chakra-ui/react'
+import { Avatar, Box} from '@chakra-ui/react'
 import { Button } from '@chakra-ui/react'
 import { useDisclosure } from '@chakra-ui/react'
 import { Select } from '@chakra-ui/react'
 import { Heading } from '@chakra-ui/react'
 import { nanoid } from "nanoid";
 import { getDoc, setDoc,updateDoc } from "firebase/firestore";
+import ratBadge from '../../../static/rat.jpg'
 import {
   Table,
   Thead,
@@ -51,44 +52,44 @@ const Rat = ()=>{
 
   const curDate =  moment().format('YYYY-MM-DD')
   const color = ['green','red','blue']
-  const init_rats = [
-    {
-      id:'1',
-      name:'Taro',
-      birthday:'2022-09-22',
-      gender:'1',
-      position:[1,'a'],
-      notes:['operation','no feeding'],
-      isDead:null
-    },
-    {
-      id:'2',
-      name:'Jiro',
-      birthday:'2022-09-10',
-      gender:'2',
-      position:[2,'c'],
-      notes:['operation'],
-      isDead:null
-    },
-    {
-      id:'3',
-      name:'Sanro',
-      birthday:'2022-09-01',
-      gender:'0',
-      position:[2,'b'],
-      notes:[],
-      isDead:null
-    },
-    {
-      id:'4',
-      name:'Yonro',
-      birthday:'2022-08-22',
-      gender:'0',
-      position:[2,'b'],
-      notes:['operation'],
-      isDead:null
-    }
-  ]
+  // const init_rats = [
+  //   {
+  //     id:'1',
+  //     name:'Taro',
+  //     birthday:'2022-09-22',
+  //     gender:'1',
+  //     position:[1,'a'],
+  //     notes:['operation','no feeding'],
+  //     isDead:null
+  //   },
+  //   {
+  //     id:'2',
+  //     name:'Jiro',
+  //     birthday:'2022-09-10',
+  //     gender:'2',
+  //     position:[2,'c'],
+  //     notes:['operation'],
+  //     isDead:null
+  //   },
+  //   {
+  //     id:'3',
+  //     name:'Sanro',
+  //     birthday:'2022-09-01',
+  //     gender:'0',
+  //     position:[2,'b'],
+  //     notes:[],
+  //     isDead:null
+  //   },
+  //   {
+  //     id:'4',
+  //     name:'Yonro',
+  //     birthday:'2022-08-22',
+  //     gender:'0',
+  //     position:[2,'b'],
+  //     notes:['operation'],
+  //     isDead:null
+  //   }
+  // ]
 
   const initFirestore = ()=>{
     alert("I know you gonna click🤗 just wasted you 10 sec")
@@ -210,10 +211,9 @@ const Rat = ()=>{
 
 
   return (
-    <div>
-      <h1>Rat Page</h1>
+    <Box h='100vh'>
       {/* For data initialization at development  */}
-      <Button onClick={initFirestore}>Init Data(For test, do not click!)</Button>
+      <Button mt='5vh' onClick={initFirestore}>Init Data(For test, do not click!)</Button>
       <Heading>Current Total: {qrats.filter(rat=>rat.isDead===null).length}</Heading>
       <Heading>Current Male: {qrats.filter(rat=>rat.gender==='1' && rat.isDead===null).length}</Heading>
       <Heading>Current Female: {qrats.filter(rat=>rat.gender==='0' && rat.isDead===null).length}</Heading>
@@ -237,7 +237,7 @@ const Rat = ()=>{
           }
           return (
             <Tr key={rat.id}>
-              <Td><Avatar name='Kent Dodds' src='https://bit.ly/kent-c-dodds' /></Td>
+              <Td><Avatar name='Kent Dodds' src={ratBadge} /></Td>
               <Td>{-1*moment(rat.birthday).diff(curDate,'days')}</Td>
               <Td>{rat.gender==='0'?<BsGenderFemale />:(rat.gender==='1'?<BsGenderMale/>:<FaBaby/>)}
               </Td>
@@ -321,7 +321,7 @@ const Rat = ()=>{
                   </ModalFooter>
                 </ModalContent>
               </Modal>
-  </div>
+  </Box>
   )
 }
 

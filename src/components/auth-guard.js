@@ -1,10 +1,7 @@
-import { Box, Spinner } from "@chakra-ui/react";
+import { Box } from "@chakra-ui/react";
 import { auth } from "../lib/firebase";
 import { Loading } from "./loading";
 import { Signin } from "./signin";
-import { useAuth } from "../context/authContext";
-import { getCurrentUser } from "../lib/firebase";
-import { getAuth } from "firebase/auth";
 import { useAuthUser } from "@react-query-firebase/auth";
 
 export const AuthGuard = ({ children }) => {

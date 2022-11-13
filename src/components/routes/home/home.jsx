@@ -1,12 +1,12 @@
-import { auth ,signOutUser} from "../../../lib/firebase";
-import { GoogleAuthProvider } from "firebase/auth";
-import { signInWithGooglePopup } from "../../../lib/firebase";
-import { onAuthStateChanged } from "firebase/auth";
 import { onAuthStateChangedListener } from "../../../lib/firebase";
-const provider = new GoogleAuthProvider();
-const handleClick = ()=>{
-  signInWithGooglePopup(auth,provider)
-}
+import { Box,Image } from "@chakra-ui/react";
+import ratSvg from '../../../static/ratwithcheese11.svg'
+import './home.css'
+// const provider = new GoogleAuthProvider();
+
+// const handleClick = ()=>{
+//   signInWithGooglePopup(auth,provider)
+// }
 
 
 onAuthStateChangedListener((user) => {
@@ -23,21 +23,25 @@ onAuthStateChangedListener((user) => {
   }
 })
 
-const handleGetUser = ()=>{
-    const user = auth.currentUser
-    console.log(user)
-}
-const handleSignOut = ()=>{
-  signOutUser()
-}
+// const handleGetUser = ()=>{
+//     const user = auth.currentUser
+//     console.log(user)
+// }
+// const handleSignOut = ()=>{
+//   signOutUser()
+// }
 const Home = ()=>{
+
   return (
-    <div className="Home">
-      Home
-      <button onClick={handleClick}>Google Sign In</button>
-      <button onClick={handleGetUser}>cur user</button>
-      <button onClick={handleSignOut}>sign out</button>
-    </div>
+  <Box bg='green.200' w='100%' h='100vh' p={4}>
+    <Box fontFamily={'Secular One'} fontSize='4xl' mt='20vh' textAlign='center' color='gray.600'>Welcome to Lab-Pro!</Box>
+    <Box fontFamily={'Secular One'} fontSize='2xl' textAlign='center' mt='5vh' color='gray'>An experimental animal management web application</Box>
+    <Image mt='10vh' ml='40%' w='25%' h='35%' src={ratSvg} />
+  </Box>
+    // <button onClick={handleClick}>Google Sign In</button>
+    // <button onClick={handleGetUser}>cur user</button>
+    // <button onClick={handleSignOut}>sign out</button>
+
   )
 }
 

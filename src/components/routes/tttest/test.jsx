@@ -3,7 +3,6 @@ import Shift from "../../shift/shift";
 import Rat from "../rat/rat";
 const Test = ()=>{
   const food_num = 10;
-  const bedding_num = 20;
   // API to be added: fetch num, history data from firebase
   const food_his = [
     { key:'1',
