@@ -10,6 +10,7 @@ import { Heading } from '@chakra-ui/react'
 import { nanoid } from "nanoid";
 import { getDoc, setDoc,updateDoc } from "firebase/firestore";
 import ratBadge from '../../../static/rat.jpg'
+// import { addCollectionAndDocuments } from "../../../lib/firebase";
 import {
   Table,
   Thead,
@@ -39,6 +40,7 @@ import { collection, query } from "firebase/firestore";
 import { db } from "../../../lib/firebase";
 import {useFirestoreQueryData} from "@react-query-firebase/firestore"
 import { doc } from "firebase/firestore";
+import { async } from "@firebase/util";
 
 const Rat = ()=>{
 
@@ -55,7 +57,7 @@ const Rat = ()=>{
   // const init_rats = [
   //   {
   //     id:'1',
-  //     name:'Taro',
+  //     nickName:'Taro',
   //     birthday:'2022-09-22',
   //     gender:'1',
   //     position:[1,'a'],
@@ -64,7 +66,7 @@ const Rat = ()=>{
   //   },
   //   {
   //     id:'2',
-  //     name:'Jiro',
+  //     nickName:'Jiro',
   //     birthday:'2022-09-10',
   //     gender:'2',
   //     position:[2,'c'],
@@ -73,7 +75,7 @@ const Rat = ()=>{
   //   },
   //   {
   //     id:'3',
-  //     name:'Sanro',
+  //     nickName:'Sanro',
   //     birthday:'2022-09-01',
   //     gender:'0',
   //     position:[2,'b'],
@@ -82,7 +84,7 @@ const Rat = ()=>{
   //   },
   //   {
   //     id:'4',
-  //     name:'Yonro',
+  //     nickName:'Yonro',
   //     birthday:'2022-08-22',
   //     gender:'0',
   //     position:[2,'b'],
@@ -93,7 +95,7 @@ const Rat = ()=>{
 
   const initFirestore = ()=>{
     alert("I know you gonna click🤗 just wasted you 10 sec")
-    //addCollectionAndDocuments('rats',init_rats)
+    // addCollectionAndDocuments('rats',init_rats)
     console.log('add run')
   }
 
@@ -108,6 +110,12 @@ const Rat = ()=>{
     onOpen: onOpenTagModal, 
     onClose: onCloseTagModal 
 } = useDisclosure()
+  const {
+    isOpen:isOpenBabyGender,
+    onOpen:onOpenBabyGender,
+    onClose:onCloseBabyGender
+  } = useDisclosure()
+
   const [idToAdd,setIdToAdd] = useState()
   const [tagToAdd,setTagToAdd] = useState('')
 
@@ -145,7 +153,7 @@ const Rat = ()=>{
   const handleAdd = ()=>{
     const newRat = {
       id: nanoid(),
-      name:newName,
+      nickName:newName,
       birthday:newBirthday,
       gender:newGender,
       position:[2,'c'],
@@ -182,6 +190,24 @@ const Rat = ()=>{
     console.log(newTag)
     setNewTags(newTag)
   }
+  const handleBabyMale = ()=>{
+    const docRef = doc(db,'rats',idToAdd)
+    updateDoc(docRef,{
+      gender:'1'
+    })
+    onCloseBabyGender()
+  }
+  const handleBabyFemale = ()=>{
+    const docRef = doc(db,'rats',idToAdd)
+    updateDoc(docRef,{
+      gender:'0'
+    })
+    onCloseBabyGender()
+  }
+  const handleOpenBabyModal = (id)=>{
+    setIdToAdd(id)
+    onOpenBabyGender();
+  }
   const handleDeleteTag = async (id,index)=>{
     const docRef = doc(db, "rats", id);
     const docSnap = await getDoc(docRef);
@@ -209,16 +235,11 @@ const Rat = ()=>{
     setTagToAdd(e.target.value)
   }
 
-
   return (
     <Box h='100vh'>
       {/* For data initialization at development  */}
       <Button mt='5vh' onClick={initFirestore}>Init Data(For test, do not click!)</Button>
-      <Heading>Current Total: {qrats.filter(rat=>rat.isDead===null).length}</Heading>
-      <Heading>Current Male: {qrats.filter(rat=>rat.gender==='1' && rat.isDead===null).length}</Heading>
-      <Heading>Current Female: {qrats.filter(rat=>rat.gender==='0' && rat.isDead===null).length}</Heading>
-      <Heading>Current Baby: {qrats.filter(rat=>rat.gender==='2' && rat.isDead===null).length}</Heading>
-      
+      <Text color='blackAlpha.600' fontSize='2xl'>Toal: {qrats.filter(rat=>rat.isDead===null).length}     Male: {qrats.filter(rat=>rat.gender==='1' && rat.isDead===null).length}     Female: {qrats.filter(rat=>rat.gender==='0' && rat.isDead===null).length}     Baby: {qrats.filter(rat=>rat.gender==='2' && rat.isDead===null).length}</Text>
   <Table variant='striped' colorScheme='teal'>
     <Thead>
       <Tr>
@@ -237,9 +258,9 @@ const Rat = ()=>{
           }
           return (
             <Tr key={rat.id}>
-              <Td><Avatar name='Kent Dodds' src={ratBadge} /></Td>
+              <Td><Avatar name='Kent Dodds' src={ratBadge}/>{rat.nickName}</Td>
               <Td>{-1*moment(rat.birthday).diff(curDate,'days')}</Td>
-              <Td>{rat.gender==='0'?<BsGenderFemale />:(rat.gender==='1'?<BsGenderMale/>:<FaBaby/>)}
+              <Td>{rat.gender==='0'?<BsGenderFemale/>:(rat.gender==='1'?<BsGenderMale/>:<div><FaBaby/><Button size='xs' onClick={()=>handleOpenBabyModal(rat.id)}>Report Gender</Button></div>)}
               </Td>
               <Td>
               <Button onClick={()=>handleOpenTagModal(rat.id)}>+</Button>
@@ -303,8 +324,8 @@ const Rat = ()=>{
             <Button  colorScheme='blue' onClick={()=>{handleAdd()}}>Add</Button>
           </ModalFooter>
         </ModalContent>
-      </Modal>
-      <Modal isOpen={isOpenTagModal} onClose={onCloseTagModal}>
+  </Modal>
+  <Modal isOpen={isOpenTagModal} onClose={onCloseTagModal}>
                 <ModalOverlay />
                 <ModalContent>
                   <ModalHeader>Input New Tag Content</ModalHeader>
@@ -314,13 +335,32 @@ const Rat = ()=>{
                   </ModalBody>
 
                   <ModalFooter>
-                    <Button colorScheme='blue' mr={3} onClick={onCloseTagModal}>
+                    <Button colorScheme='red' variant='ghost' onClick={onCloseTagModal}>
                       Cancel
                     </Button>
-                    <Button variant='ghost' colorScheme='red' onClick={handleAddTag}>Add</Button>
+                    <Button ml={3} colorScheme='teal' onClick={handleAddTag}>Add</Button>
                   </ModalFooter>
                 </ModalContent>
-              </Modal>
+  </Modal>
+  <Modal isOpen={isOpenBabyGender} onClose={onCloseBabyGender}>
+                <ModalOverlay />
+                <ModalContent>
+                  <ModalHeader>Report Gender of baby</ModalHeader>
+                  <ModalCloseButton />
+                  <ModalBody>
+                      <Text color='red'>Caution: Gender can not be changed again once selected!</Text>
+                  </ModalBody>
+                  <ModalFooter>
+                    <Button colorScheme='blue' mr={3} onClick={handleBabyMale}>
+                      Male
+                    </Button>
+                    <Button colorScheme='blue' mr={3} onClick={handleBabyFemale}>
+                      Female
+                    </Button>
+
+                  </ModalFooter>
+                </ModalContent>
+  </Modal>
   </Box>
   )
 }
