@@ -40,17 +40,13 @@ import { collection, query } from "firebase/firestore";
 import { db } from "../../../lib/firebase";
 import {useFirestoreQueryData} from "@react-query-firebase/firestore"
 import { doc } from "firebase/firestore";
-import { async } from "@firebase/util";
+
 
 const Rat = ()=>{
-
-
 
   const ratsRef = collection(db, 'rats');
   const ratsQuery = useFirestoreQueryData(["rats"],query(ratsRef),{subscribe:true,idField:"name"})
   const qrats = ratsQuery.data || []
-
-
 
   const curDate =  moment().format('YYYY-MM-DD')
   const color = ['green','red','blue']
