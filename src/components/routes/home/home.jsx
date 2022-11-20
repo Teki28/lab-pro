@@ -1,10 +1,10 @@
 import { onAuthStateChangedListener } from "../../../lib/firebase";
 import { getAuth } from "firebase/auth";
-import { Box,Button,Image} from "@chakra-ui/react";
+import { Box,Button,CheckboxIcon,Image,Divider} from "@chakra-ui/react";
 import moment from "moment/moment";
 import { nanoid } from "nanoid";
 import { useState } from "react";
-import { orderBy, setDoc } from "firebase/firestore";
+import { limit, orderBy, setDoc } from "firebase/firestore";
 import { useDisclosure } from '@chakra-ui/react'
 import { doc } from "firebase/firestore";
 import { Grid, GridItem } from '@chakra-ui/react'
@@ -24,7 +24,7 @@ import {
   ListItem,
   ListIcon,
 } from '@chakra-ui/react'
-import {CheckCircleIcon} from '@chakra-ui/icons'
+import {CheckCircleIcon,InfoIcon,WarningTwoIcon} from '@chakra-ui/icons'
 import ratSvg from '../../../static/ratwithcheese11.svg'
 import './home.css'
 import { addCollectionAndDocuments,db } from "../../../lib/firebase";
@@ -36,8 +36,7 @@ import { collection, query } from "firebase/firestore";
 //   signInWithGooglePopup(auth,provider)
 // }
 
-const auth = getAuth();
-const user = auth.currentUser;
+
 
 const initPosts = [
   {
@@ -101,9 +100,11 @@ onAuthStateChangedListener((user) => {
 //   signOutUser()
 // }
 const Home = ()=>{
+  const auth = getAuth();
+  const user = auth.currentUser;
 
   const postsRef = collection(db, 'posts');
-  const postsQuery = useFirestoreQueryData(["posts"],query(postsRef,orderBy("date","desc")),{subscribe:true,idField:"id"})
+  const postsQuery = useFirestoreQueryData(["posts"],query(postsRef,orderBy("date","desc"),limit(10)),{subscribe:true,idField:"id"})
   const posts = postsQuery.data || []
 
    
@@ -118,10 +119,11 @@ const Home = ()=>{
     setType(e.target.value)
   }
   const handleAdd = ()=>{
+    console.log(user)
     const curDate =  moment().format('YYYY-MM-DD')
     const newContent = {
       id: nanoid(),
-      name:user.displayName,
+      name:user.displayName || 'Visitor',
       date:curDate,
       content:content,
       type:type
@@ -131,6 +133,9 @@ const Home = ()=>{
     setType('')
     onClose();
   }
+
+  const IconList = [InfoIcon,WarningTwoIcon,CheckCircleIcon]
+  const ColorList = ['green.500','red.500','blue.500']
 
   // const initFirestore = ()=>{
   // alert("I know you gonna click🤗 just wasted you 10 sec")
@@ -153,9 +158,12 @@ const Home = ()=>{
               posts.map(post=>{
                 return (
                 <ListItem key={post.id}>
-                  <ListIcon as={CheckCircleIcon} color='green.500'/>
-                  name: {post.name}, date: {post.date}, content: {post.content}, type:{post.type}
-                </ListItem>)
+                  <ListIcon as={IconList[parseInt(post.type)]} color={ColorList[parseInt(post.type)]}/>
+                  <b>{post.name}</b> at <b>{post.date}</b> said: <br />
+                  <Text as='b' color='gray.600'>{post.content}</Text>
+                  <Divider color='gray' />
+                </ListItem>
+                )
               })
             }
           </List>
@@ -176,7 +184,6 @@ const Home = ()=>{
                 <option value='0'>Alert</option>
                 <option value='2'>News</option>
               </Select>
-              <Text as="mark">Notes:use comma to separate</Text>
               <br></br>
               <input type="text" placeholder="input content here" onChange={handleContentChange}/>
             </form>
