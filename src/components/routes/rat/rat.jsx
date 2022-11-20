@@ -10,6 +10,10 @@ import { Heading } from '@chakra-ui/react'
 import { nanoid } from "nanoid";
 import { getDoc, setDoc,updateDoc } from "firebase/firestore";
 import ratBadge from '../../../static/rat.jpg'
+import ratBadge2 from '../../../static/HappyRat.jpeg'
+import ratBadge3 from '../../../static/CheeseRat.webp'
+import ratBadge4 from '../../../static/ChirsmasRat.webp'
+import ratBadge5 from '../../../static/DanceRat.webp'
 // import { addCollectionAndDocuments } from "../../../lib/firebase";
 import {
   Table,
@@ -40,17 +44,13 @@ import { collection, query } from "firebase/firestore";
 import { db } from "../../../lib/firebase";
 import {useFirestoreQueryData} from "@react-query-firebase/firestore"
 import { doc } from "firebase/firestore";
-import { async } from "@firebase/util";
+
 
 const Rat = ()=>{
-
-
 
   const ratsRef = collection(db, 'rats');
   const ratsQuery = useFirestoreQueryData(["rats"],query(ratsRef),{subscribe:true,idField:"name"})
   const qrats = ratsQuery.data || []
-
-
 
   const curDate =  moment().format('YYYY-MM-DD')
   const color = ['green','red','blue']
@@ -235,6 +235,8 @@ const Rat = ()=>{
     setTagToAdd(e.target.value)
   }
 
+  const IconList = [ratBadge,ratBadge2,ratBadge3,ratBadge4,ratBadge5]
+
   return (
     <Box h='100vh'>
       {/* For data initialization at development  */}
@@ -258,7 +260,7 @@ const Rat = ()=>{
           }
           return (
             <Tr key={rat.id}>
-              <Td><Avatar name='Kent Dodds' src={ratBadge}/>{rat.nickName}</Td>
+              <Td><Avatar name='Kent Dodds' src={IconList[Math.floor(Math.random()*5)]}/>{rat.nickName}</Td>
               <Td>{-1*moment(rat.birthday).diff(curDate,'days')}</Td>
               <Td>{rat.gender==='0'?<BsGenderFemale/>:(rat.gender==='1'?<BsGenderMale/>:<div><FaBaby/><Button size='xs' onClick={()=>handleOpenBabyModal(rat.id)}>Report Gender</Button></div>)}
               </Td>
